@@ -57,7 +57,7 @@
 
         .personal-data-consent {
             display: flex;
-            align-items: flex-end;
+            align-items: center;
             gap: 8px;
         }
         .personal-data-consent input[type="checkbox"] {
@@ -67,6 +67,8 @@
             position: relative;
             width: 20px;
             height: 20px;
+
+            flex-shrink: 0;
 
             padding: 0;
             margin: 0;
@@ -381,7 +383,7 @@
                             <input type="checkbox" id="consentOrder" name="consentOrder"/>
                             <label for="consentOrder">
                                 <span>
-                                    Я ознакомлен с <a href="{{ asset('/documents/Приказ_ЦСВИ_№26_от_30_04_2026_Об_утверждении_политики_обработки.pdf') }}" rel="noopener noreferrer" target="_blank"> политикой </a> обработки персональных данных
+                                    Я ознакомлен с <a href="{{ asset('/storage/documents/prikaz.pdf') }}" rel="noopener noreferrer" target="_blank"> политикой </a> обработки персональных данных
                                 </span>
                             </label>
                         </div>
@@ -389,7 +391,7 @@
                             <input type="checkbox" id="consentPersonalData" name="consentPersonalData"/>
                             <label for="consentPersonalData">
                                 <span>
-                                    Я даю <a href="{{ asset('/documents/Согласие_на_обработку_ПД_+_перечень_организаций.pdf') }}" rel="noopener noreferrer" target="_blank">согласие</a> на обработку персональных данных
+                                    Я даю <a href="{{ asset('/storage/documents/soglasie.pdf') }}" rel="noopener noreferrer" target="_blank">согласие</a> на обработку персональных данных
                                 </span>
                             </label>
                         </div>
