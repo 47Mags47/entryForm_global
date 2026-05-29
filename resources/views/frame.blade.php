@@ -49,12 +49,76 @@
             margin-bottom: 12px;
         }
 
+        .personal-data-consent-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .personal-data-consent {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .personal-data-consent input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+
+            position: relative;
+            width: 20px;
+            height: 20px;
+
+            padding: 0;
+            margin: 0;
+
+            border: 1px solid #ddd;
+            border-radius: 5px;
+
+            box-sizing: border-box;
+            background: white;
+        }
+        .personal-data-consent input[type="checkbox"]:checked {
+            background: #3498db;
+            position: relative;
+            border: 1px solid #3498db;
+        }
+        .personal-data-consent input[type="checkbox"]:checked::after {
+            content: "✓";
+            position: absolute;
+            color: white;
+            font-size: 18px;
+
+            font-weight: bold;
+
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .personal-data-consent label {
+            margin-bottom: 0;
+        }
+        .personal-data-consent label span {
+            font-size: 14px;
+            font-weight: normal;
+        }
+        .personal-data-consent a,
+        .personal-data-consent a:visited {
+            text-decoration: none;
+            font-weight: normal;
+            color: blue;
+        }
+        .personal-data-consent label,
+        .personal-data-consent input[type="checkbox"] {
+            cursor: pointer;
+        }
+
         label {
             display: block;
             margin-bottom: 6px;
             font-weight: 600;
         }
 
+        input:not([type="checkbox"]),
         input,
         select,
         textarea {
@@ -295,7 +359,14 @@
 
                     <div class="form-group">
                         <label for="phone" class="required">Телефон *</label>
-                        <input id="phone" name="phone" type="tel" placeholder="+7 (___) ___-__-__">
+                        <input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            placeholder="+7 (___) ___-__-__"
+                            inputmode="numeric"
+                            autocomplete="tel"
+                        />
                         <div class="error" id="phoneError"></div>
                     </div>
 
@@ -304,10 +375,29 @@
                         <input id="email" name="email" type="email">
                         <div class="error" id="emailError"></div>
                     </div>
+
+                    <div class="personal-data-consent-container">
+                        <div class="personal-data-consent">
+                            <input type="checkbox" id="consentOrder" name="consentOrder"/>
+                            <label for="consentOrder">
+                                <span>
+                                    Я ознакомлен с <a href="{{ asset('/documents/Приказ_ЦСВИ_№26_от_30_04_2026_Об_утверждении_политики_обработки.pdf') }}" rel="noopener noreferrer" target="_blank"> политикой </a> обработки персональных данных
+                                </span>
+                            </label>
+                        </div>
+                        <div class="personal-data-consent">
+                            <input type="checkbox" id="consentPersonalData" name="consentPersonalData"/>
+                            <label for="consentPersonalData">
+                                <span>
+                                    Я даю <a href="{{ asset('/documents/Согласие_на_обработку_ПД_+_перечень_организаций.pdf') }}" rel="noopener noreferrer" target="_blank">согласие</a> на обработку персональных данных
+                                </span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Шаг 2 -->
-                @if ($frame->division->group->divisions->count() > 0)
+                @if ($frame->division->group !== null and $frame->division->group->divisions->count() > 0)
                     <div class="step" id="step2">
                         <h3>2. Подразделение *</h3>
                         <div class="form-group">
@@ -400,7 +490,7 @@
 
                 <div class="navigation">
                     <button type="button" id="prevBtn" disabled>Назад</button>
-                    <button type="button" id="nextBtn">Далее</button>
+                    <button type="button" id="nextBtn" disabled>Далее</button>
                 </div>
             </form>
         </div>
@@ -429,6 +519,10 @@
             };
 
             let flatpickrInstance = null;
+
+            $('#phone').mask('+7 (000) 000-00-00', {
+                placeholder: "+7 (___) ___-__-__"
+            });
 
             function initFlatpickr() {
                 if (flatpickrInstance) flatpickrInstance.destroy();
@@ -518,15 +612,24 @@
                     }
 
                     const regex = /^(\+7|8|7)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
-                    const phoneRe = $('#phone').val();
-                    if (!$('#phone').val().trim()) {
+                    // const phoneRe = $('#phone').val();
+                    // if (!$('#phone').val().trim()) {
+                    //     $('#phoneError').text('Введите телефон');
+                    //     ok = false;
+                    // }
+                    // else if (!regex.test(phoneRe)){
+                    //     $('#phoneError').text('Номер не соответствует формату +7 (___) ___-__-__');
+                    //     ok = false;
+                    // }
+                    const phoneRe = $('#phone').val().trim();
+                    if (!phoneRe) {
                         $('#phoneError').text('Введите телефон');
                         ok = false;
                     }
-                    else if (!regex.test(phoneRe)){
-                        $('#phoneError').text('Номер не соответствует формату +7 (___) ___-__-__');
+                    else if (!regex.test(phoneRe)) {
+                        $('#phoneError').text('Введите номер полностью');
                         ok = false;
-                    } 
+                    }
                 }
 
                 if (step === 2 && !$division.val()) {
@@ -583,6 +686,30 @@
                     showStep(currentStep);
                 }
             });
+
+            function checkStep1Validity() {
+                const lastName = $('#last_name').val().trim();
+                const firstName = $('#first_name').val().trim();
+                const phone = $('#phone').val().trim();
+
+                const consentPersonal = $('#consentPersonalData').is(':checked');
+                const consentOrder = $('#consentOrder').is(':checked');
+
+                const regex = /^(\+7|8|7)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
+
+                const isValid =
+                    lastName &&
+                    firstName &&
+                    phone &&
+                    regex.test(phone) &&
+                    consentPersonal &&
+                    consentOrder;
+
+                $('#nextBtn').prop('disabled', !isValid);
+            }
+            $('#last_name, #first_name, #phone').on('input', checkStep1Validity);
+            $('#consentPersonalData, #consentOrder').on('change', checkStep1Validity);
+
 
             function loadServices() {
                 if (!divisionId) return;
