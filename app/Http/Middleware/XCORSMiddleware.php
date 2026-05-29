@@ -24,6 +24,6 @@ class XCORSMiddleware
             abort(404);
 
 
-        return $next($request)/*->header('Content-Security-Policy', 'frame-ancestors' . $frame->division->url)*/;
+        return $next($request);
     }
 }
