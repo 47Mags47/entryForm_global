@@ -77,6 +77,9 @@
                 <p><strong>Телефон:</strong> {{ $subscribe->phone }}</p>
                 <p><strong>Услуга:</strong> {{ $subscribe->service->name }}</p>
                 <p><strong>Специалист:</strong> {{ $subscribe->worker->last_name . ' ' . $subscribe->worker->first_name . ' ' . $subscribe->worker->middle_name }}</p>
+                @if($subscribe->worker->office)
+                    <p><strong>Кабинет: {{ $subscribe->worker->office }}</strong></p>
+                @endif
                 <p><strong>Дата:</strong> {{ $subscribe->start_at }}</p>
                 @if ($subscribe->comment)
                     <p><strong>Комментарий к записи:</strong> {{ $subscribe->comment }} </p>

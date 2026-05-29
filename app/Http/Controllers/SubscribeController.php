@@ -30,6 +30,7 @@ class SubscribeController extends Controller
             'worker_id',
             'comment',
         ));
+
         SubscribesInfoJob::dispatch($subscribe);
         return view('complited');
     }

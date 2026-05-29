@@ -520,6 +520,8 @@
                 allowedDays: []
             };
 
+            loadServices()
+
             let flatpickrInstance = null;
 
             $('#phone').mask('+7 (000) 000-00-00', {
@@ -725,6 +727,7 @@
                     .done(data => {
                         const valid = data.filter(s => s.workers && s.workers.length > 0);
                         cache.services = valid;
+
                         renderServices(valid);
                     })
                     .fail(() => alert('Ошибка загрузки услуг'));
