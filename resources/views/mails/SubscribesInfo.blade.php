@@ -70,25 +70,30 @@
         </div>
         <div class="content">
             <h3>Информация о записи:</h3>
+
+            <div class="info">
+                <p>
+                    Для получения нескольких государственных услуг необходимо осуществить соответствующее количество онлайн-записей.
+                </p>
+            </div>
+
             <div class="info">
                 <p><strong>Фамилия:</strong> {{ $subscribe->last_name }}</p>
                 <p><strong>Имя:</strong> {{ $subscribe->first_name }}</p>
                 <p><strong>Отчество:</strong> {{ $subscribe->middle_name }}</p>
-                <p><strong>Телефон:</strong> {{ $subscribe->phone }}</p>
+                <br>
                 <p><strong>Услуга:</strong> {{ $subscribe->service->name }}</p>
                 <p><strong>Специалист:</strong> {{ $subscribe->worker->last_name . ' ' . $subscribe->worker->first_name . ' ' . $subscribe->worker->middle_name }}</p>
                 @if($subscribe->worker->office)
                     <p><strong>Кабинет: {{ $subscribe->worker->office }}</strong></p>
                 @endif
-                <p><strong>Дата:</strong> {{ $subscribe->start_at }}</p>
-                @if ($subscribe->comment)
-                    <p><strong>Комментарий к записи:</strong> {{ $subscribe->comment }} </p>
-                @endif
+                <p><strong>Дата:</strong> {{ $subscribe->start_at->format('d.m.Y') }}</p>
+                <p><strong>Время:</strong> {{ $subscribe->start_at->format('H:i') }}</p>
+                <p><strong>Адрес организации:</strong> {{ $subscribe->division->address }}</p>
             </div>
         </div>
         <div class="footer">
             Это письмо сформировано автоматически. Пожалуйста, не отвечайте на него.
-            <p>&copy; Copyright {{ date('Y') }} {{ config('app.name') }}. Все права защищены.</p>
         </div>
     </div>
 </body>

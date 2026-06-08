@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Subscribe;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -28,7 +27,7 @@ class SubscribesInfoMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Subscribes Info',
+            subject: 'Запись на прием в орган СЗН',
         );
     }
 
