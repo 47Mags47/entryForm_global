@@ -3,19 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSubscribeRequest;
+use App\Jobs\SendSubscribeWorkerAlertJob;
 use App\Jobs\SubscribesInfoJob;
 use App\Models\Frame;
 use App\Models\Subscribe;
+
 class SubscribeController extends Controller
 {
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function create(string $token){
+    public function create(string $token)
+    {
+        SendSubscribeWorkerAlertJob::dispatch(\App\Models\Subscribe::all()->random());
+
         $frame = Frame::where('token', $token)->firstOrFail();
         return response()
-                ->view('frame', compact('frame'));
+            ->view('frame', compact('frame'));
     }
+
     public function store(StoreSubscribeRequest $request)
     {
         $subscribe = Subscribe::create($request->only(
@@ -32,6 +35,11 @@ class SubscribeController extends Controller
         ));
 
         SubscribesInfoJob::dispatch($subscribe);
+
+        if($subscribe->worker->receiveMail){
+            SendSubscribeWorkerAlertJob::dispatch($subscribe);
+        }
+
         return view('complited');
     }
 }

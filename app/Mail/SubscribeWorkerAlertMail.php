@@ -9,24 +9,23 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class SubscribesInfoMail extends Mailable
+class SubscribeWorkerAlertMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public function __construct(public Subscribe $subscribe) {}
 
-
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Запись на прием в орган СЗН',
+            subject: 'Новая запись на прием',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'mails.SubscribesInfo',
+            view: 'mails.SubscribeWorkerAlertMail',
         );
     }
 
