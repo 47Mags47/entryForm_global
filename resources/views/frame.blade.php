@@ -408,7 +408,7 @@
                                 <option value="">Выберите подразделение</option>
 
                                 @foreach ($frame->division->group->divisions as $child)
-                                    <option value="{{ $child->id }}">{{ $child->name }}</option>
+                                    <option value="{{ $child->id }}" data-address="{{ $child->address }}">{{ $child->name }}</option>
                                 @endforeach
 
                             </select>
@@ -424,7 +424,7 @@
                             </label>
 
                             <input type="hidden" id="division_id" name="division_id" value="{{ $frame->division->id }}"
-                                data-name="{{ $frame->division->name }}">
+                                data-name="{{ $frame->division->name }}" data-address="{{ $frame->division->address }}">
                         </div>
                     </div>
 
@@ -475,10 +475,13 @@
                         <p><strong>ФИО:</strong> <span id="confirmName"></span></p>
                         <p><strong>Телефон:</strong> <span id="confirmPhone"></span></p>
                         <p><strong>Email:</strong> <span id="confirmEmail"></span></p>
-                        <p><strong>Подразделение:</strong> <span id="confirmDepartment"></span></p>
+                        <br>
                         <p><strong>Услуга:</strong> <span id="confirmService"></span></p>
                         <p><strong>Специалист:</strong> <span id="confirmWorker"></span></p>
                         <p><strong>Дата и время:</strong> <span id="confirmDateTime"></span></p>
+                        <br>
+                        <p><strong>Подразделение:</strong> <span id="confirmDepartment"></span></p>
+                        <p><strong>Адрес:</strong> <span id="confirmDepartmentAddress"></span></p>
                     </div>
                     <div class="form-group comment-group">
                         <label for="comment">Комментарий к записи</label>
@@ -486,8 +489,6 @@
                             placeholder="Введите комментарий..."></textarea>
                         <div id="commentCounter">0 / 500</div>
                     </div>
-                    {{-- <div class="politic"><a href="{{ $frame->division->politic }}">Политика обработки персональных данных</a></div> --}}
-
                 </div>
 
                 <div class="navigation">
@@ -589,6 +590,13 @@
                 $('#confirmDepartment').text(
                     $('#division_id').data('name') ||
                     $division.find('option:selected').text() ||
+                    '—'
+                );
+
+                // HACK
+                $('#confirmDepartmentAddress').text(
+                    $('#division_id').data('address') ||
+                    $division.find('option:selected').data('address') ||
                     '—'
                 );
 
