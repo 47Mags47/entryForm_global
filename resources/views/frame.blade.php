@@ -164,6 +164,16 @@
             border-radius: 6px;
         }
 
+        .alert-container {
+            background-color: #fff9e6;
+            border-left: 4px solid #ffb000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: .9rem;
+            line-height: 1.5;
+            color: #5c4300;
+        }
         .small {
             font-size: .9rem;
             color: #666;
@@ -317,19 +327,17 @@
                 Подтверждение факта онлайн-записи будет направлено на электронную почту, указанную при заполнении формы.
             </p>
 
-            <p class="small extra-info" id="info-step-1" style="display:none;">
+            <p class="alert-container" id="info-step-1" style="display:none;">
                 Если хотите получить уведомление с информацией о записи, пожалуйста, укажите почту.
             </p>
 
-            <p class="small extra-info" id="info-step-3" style="display:none;">
+            <p class="alert-container" id="info-step-3" style="display:none;">
                 Уведомляем, что при одновременном получении нескольких государственных услуг — каждая требует
                 отдельной электронной записи.
             </p>
 
-            <p class="small extra-info" id="info-step-5" style="display:none;">
-                Если по каким-либо причинам Вы не сможете посетить органы социальной защиты в выбранное время,
-                запись необходимо отменить — позвоните в УСЗН. Сотрудник аннулирует предварительную запись и освободит
-                зарезервированное вами время для других посетителей.
+            <p class="alert-container" id="info-step-5" style="display:none;">
+                Для получения нескольких государственных услуг необходимо осуществить соответствующее количество онлайн-записей.
             </p>
         </div>
         <div class="form-container">
@@ -374,7 +382,7 @@
 
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input id="email" name="email" type="email">
+                        <input id="email" type="email" name="email" placeholder="example@mail.ru">
                         <div class="error" id="emailError"></div>
                     </div>
 
@@ -624,15 +632,6 @@
                     }
 
                     const regex = /^(\+7|8|7)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
-                    // const phoneRe = $('#phone').val();
-                    // if (!$('#phone').val().trim()) {
-                    //     $('#phoneError').text('Введите телефон');
-                    //     ok = false;
-                    // }
-                    // else if (!regex.test(phoneRe)){
-                    //     $('#phoneError').text('Номер не соответствует формату +7 (___) ___-__-__');
-                    //     ok = false;
-                    // }
                     const phoneRe = $('#phone').val().trim();
                     if (!phoneRe) {
                         $('#phoneError').text('Введите телефон');
@@ -700,26 +699,30 @@
             });
 
             function checkStep1Validity() {
+                const regex = /^(\+7|8|7)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
                 const lastName = $('#last_name').val().trim();
                 const firstName = $('#first_name').val().trim();
                 const phone = $('#phone').val().trim();
+                const email = $('#email').val().trim();
 
                 const consentPersonal = $('#consentPersonalData').is(':checked');
                 const consentOrder = $('#consentOrder').is(':checked');
 
-                const regex = /^(\+7|8|7)[\s\-]?\(?\d{3}\)?[\s\-]?\d{3}[\s\-]?\d{2}[\s\-]?\d{2}$/;
-
+                const isValidEmail = !email || emailRegex.test(email);
                 const isValid =
                     lastName &&
                     firstName &&
                     phone &&
+                    isValidEmail &&
                     regex.test(phone) &&
                     consentPersonal &&
                     consentOrder;
 
                 $('#nextBtn').prop('disabled', !isValid);
             }
-            $('#last_name, #first_name, #phone').on('input', checkStep1Validity);
+            $('#last_name, #first_name, #phone, #email').on('input', checkStep1Validity);
             $('#consentPersonalData, #consentOrder').on('change', checkStep1Validity);
 
 

@@ -5,60 +5,106 @@
     <title>Запись на прием</title>
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f7f8fa;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f6f9;
+            color: #2c3e50;
             margin: 0;
             padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
         .email-container {
-            max-width: 600px;
-            margin: 30px auto;
+            max-width: 550px;
+            margin: 40px auto;
             background: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            border: 1px solid #e8ebf0;
         }
         .header {
             background-color: #83adf0;
-            color: #fff;
+            color: #ffffff;
             text-align: center;
-            padding: 20px;
+            padding: 30px 20px;
         }
         .header h1 {
-            font-size: 22px;
+            font-size: 20px;
+            font-weight: 600;
             margin: 0;
+            line-height: 1.4;
         }
         .content {
-            padding: 25px 30px;
+            padding: 30px 30px 15px 30px;
         }
-        .content h3 {
-            font-size: 18px;
-            color: #111;
-            margin-top: 0;
-            margin-bottom: 15px;
+        .alert-container {
+            background-color: #fff9e6;
+            border-left: 4px solid #ffb000;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 30px;
         }
-        .info p {
-            margin: 6px 0;
-            font-size: 15px;
+        .alert-container p {
+            margin: 0;
+            font-size: 14px;
             line-height: 1.5;
+            color: #5c4300;
         }
-        .info p strong {
-            color: #111;
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a202c;
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-group {
+            padding-bottom: 2px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+        .info-label {
+            width: 120px;
+            color: #718096;
+            flex-shrink: 0;
+        }
+        .info-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+        .divider {
+            height: 1px;
+            background-color: #edf2f7;
+            margin: 15px 0;
         }
         .footer {
-            background-color: #f3f4f6;
+            background-color: #f8f8f8;
             text-align: center;
-            font-size: 13px;
-            color: #666;
-            padding: 15px;
+            font-size: 12px;
+            color: #9c9c9c;
+            padding: 20px;
+            border-top: 1px solid #edf2f7;
         }
         @media only screen and (max-width: 600px) {
             .email-container {
-                margin: 10px;
+                margin: 0;
+                border-radius: 0;
+                border: none;
             }
             .content {
                 padding: 20px;
+            }
+            .info-row {
+                flex-direction: column;
+                margin-bottom: 12px;
+            }
+            .info-label {
+                width: 100%;
+                margin-bottom: 2px;
+                font-size: 13px;
             }
         }
     </style>
@@ -66,34 +112,73 @@
 <body>
     <div class="email-container">
         <div class="header">
-            <h1>Запись на приём в {{ $subscribe->division->name }}</h1>
+            <h1>Запись на приём в<br>{{ $subscribe->division->name }}</h1>
         </div>
-        <div class="content">
-            <h3>Информация о записи:</h3>
 
-            <div class="info">
+        <div class="content">
+            <!-- Важное уведомление -->
+            <div class="alert-container">
                 <p>
-                    Для получения нескольких государственных услуг необходимо осуществить соответствующее количество онлайн-записей.
+                    Если Вы не сможете прийти на прием в выбранное время, запись необходимо отменить по
+                    @if($subscribe->worker->phone !== null)
+                        телефону {{ $subscribe->worker->phone }}.
+                    @else
+                        телефону.
+                    @endif
                 </p>
             </div>
 
-            <div class="info">
-                <p><strong>Фамилия:</strong> {{ $subscribe->last_name }}</p>
-                <p><strong>Имя:</strong> {{ $subscribe->first_name }}</p>
-                <p><strong>Отчество:</strong> {{ $subscribe->middle_name }}</p>
-                <br>
-                <p><strong>Услуга:</strong> {{ $subscribe->service->name }}</p>
-                <p><strong>Специалист:</strong> {{ $subscribe->worker->last_name . ' ' . $subscribe->worker->first_name . ' ' . $subscribe->worker->middle_name }}</p>
-                @if($subscribe->worker->office)
-                    <p><strong>Кабинет: {{ $subscribe->worker->office }}</strong></p>
+            <!-- Данные заявителя -->
+            <div class="info-group">
+                <h3 class="section-title">Заявитель</h3>
+                <div class="info-row">
+                    <div class="info-label">Фамилия</div>
+                    <div class="info-value">{{ $subscribe->last_name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Имя</div>
+                    <div class="info-value">{{ $subscribe->first_name }}</div>
+                </div>
+                @if($subscribe->middle_name)
+                <div class="info-row">
+                    <div class="info-label">Отчество</div>
+                    <div class="info-value">{{ $subscribe->middle_name }}</div>
+                </div>
                 @endif
-                <p><strong>Дата:</strong> {{ $subscribe->start_at->format('d.m.Y') }}</p>
-                <p><strong>Время:</strong> {{ $subscribe->start_at->format('H:i') }}</p>
-                <p><strong>Адрес организации:</strong> {{ $subscribe->division->address }}</p>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Детали приема -->
+            <div class="info-group">
+                <h3 class="section-title">Детали приема</h3>
+                <div class="info-row">
+                    <div class="info-label">Услуга</div>
+                    <div class="info-value">{{ $subscribe->service->name }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Специалист</div>
+                    <div class="info-value">{{ $subscribe->worker->last_name . ' ' . $subscribe->worker->first_name . ' ' . $subscribe->worker->middle_name }}</div>
+                </div>
+                @if($subscribe->worker->office)
+                <div class="info-row">
+                    <div class="info-label">Кабинет</div>
+                    <div class="info-value">{{ $subscribe->worker->office }}</div>
+                </div>
+                @endif
+                <div class="info-row">
+                    <div class="info-label">Дата и время</div>
+                    <div class="info-value">{{ $subscribe->start_at->format('d.m.Y') }} в {{ $subscribe->start_at->format('H:i') }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label">Адрес</div>
+                    <div class="info-value">{{ $subscribe->division->address }}</div>
+                </div>
             </div>
         </div>
+
         <div class="footer">
-            Это письмо сформировано автоматически. Пожалуйста, не отвечайте на него.
+            Это автоматическое письмо, отвечать на него не нужно.
         </div>
     </div>
 </body>
