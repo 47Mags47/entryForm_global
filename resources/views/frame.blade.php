@@ -541,7 +541,6 @@
                 if (flatpickrInstance) flatpickrInstance.destroy();
 
                 flatpickrInstance = flatpickr("#date", {
-                    minDate: new Date().fp_incr(1),
                     dateFormat: "Y-m-d",
                     altInput: true,
                     altFormat: "d.m.Y",
