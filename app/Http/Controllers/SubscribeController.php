@@ -8,14 +8,10 @@ use App\Jobs\SubscribesInfoJob;
 use App\Models\Frame;
 use App\Models\Subscribe;
 
-use App\resources\views\mails\SubscribeInfo;
-
 class SubscribeController extends Controller
 {
     public function create(string $token)
     {
-        SendSubscribeWorkerAlertJob::dispatch(\App\Models\Subscribe::all()->random());
-
         $frame = Frame::where('token', $token)->firstOrFail();
         return response()
             ->view('frame', compact('frame'));
