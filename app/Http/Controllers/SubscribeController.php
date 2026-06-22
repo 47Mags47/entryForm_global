@@ -8,10 +8,22 @@ use App\Jobs\SubscribesInfoJob;
 use App\Models\Frame;
 use App\Models\Subscribe;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
+
 class SubscribeController extends Controller
 {
     public function create(string $token)
     {
+        try {
+            DB::connection()->getPdo();
+        } catch (\Exception $e) {
+            return response()
+                ->view('dbDisconnected', [], 503);
+        }
+
+        SendSubscribeWorkerAlertJob::dispatch(\App\Models\Subscribe::all()->random());
+
         $frame = Frame::where('token', $token)->firstOrFail();
         return response()
             ->view('frame', compact('frame'));

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Middleware\XCORSMiddleware;
+use App\Http\Middleware\DataBaseConnectionMiddleware;
+
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,7 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
             XCORSMiddleware::class,
         ])->validateCsrfTokens(except: [
             'frames/*'
-        ]);
+        ])
+        ->append(DataBaseConnectionMiddleware::class);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
