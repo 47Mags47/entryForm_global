@@ -772,6 +772,8 @@
             });
 
             $worker.change(function() {
+                resetStep4();
+
                 const workerId = $(this).val();
                 const serviceId = $service.val();
                 cache.allowedDays = [];
@@ -836,6 +838,11 @@
 
                 if (divisionId) loadServices();
             });
+
+            function resetStep4() {
+                $('#date').val('');
+                $('#time').val('')
+            }
 
             showStep(1);
         })(jQuery);
