@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-use App\Http\Resources\SubscribeTimeLineResource;
 use App\Models\UserRole;
-use Carbon\CarbonImmutable;
-use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,8 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Carbon;
-use App\Models\ChangeEmailToken;
 
 class User extends Authenticatable
 {
@@ -31,7 +26,6 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
-        'division_id'
     ],
     $hidden = [
         'password',

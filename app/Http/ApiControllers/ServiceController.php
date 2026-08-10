@@ -2,27 +2,41 @@
 
 namespace App\Http\ApiControllers;
 
+use App\Models\Division;
 use App\Models\User;
 use App\Models\Service;
 use Illuminate\Http\Request;
 use Carbon\CarbonImmutable;
 
-
 class ServiceController
 {
-    public function index(Request $request)
+    public function index(Request $request, Division $division)
     {
-        return json_encode(Service::all()->map(fn($service) => [
-            'id' => $service->id,
-            'name' => $service->name,
-            'workers' => $service->workers()
-                ->where('division_id', $request->input('division'))
+        $division = Division::find($request->input('division'));
+
+        if ($division === null)
+            return abort(404);
+
+        $workers_ids = $division
+            ->workers()
+            ->get(['id'])
+            ->pluck(['id']);
+
+        return json_encode(
+            Service::query()
+                ->with('workers')
+                ->whereHas('workers', fn($query) => $query->whereIn('user_id', $workers_ids))
                 ->get()
-                ->map(fn($user) => [
-                    'id' => $user->id,
-                    'full_name' => implode(' ', [$user->last_name, $user->first_name, $user->middle_name])
+                ->map(fn($service) => [
+                    'id' => $service->id,
+                    'name' => $service->name,
+                    'workers' => $service->workers
+                        ->map(fn($user) => [
+                            'id' => $user->id,
+                            'full_name' => implode(' ', [$user->last_name, $user->first_name, $user->middle_name])
+                        ])
                 ])
-        ]));
+        );
     }
 
     public function shedulesFromWorker(Request $request)
@@ -43,5 +57,4 @@ class ServiceController
             $service->getAvailableWeekdays($worker)
         );
     }
-
 }
