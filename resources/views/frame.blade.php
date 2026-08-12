@@ -537,18 +537,36 @@
                 placeholder: "+7 (___) ___-__-__"
             });
 
+            const today = new Date();
+
+            const tomorrow = new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                today.getDate() + 1
+            );
+
+            const maxDate = new Date(
+                today.getFullYear(),
+                today.getMonth() + 1,
+                today.getDate()
+            );
+
             function initFlatpickr() {
                 if (flatpickrInstance) flatpickrInstance.destroy();
 
                 flatpickrInstance = flatpickr("#date", {
-                    minDate: new Date().fp_incr(1),
+                    minDate: tomorrow,
+                    maxDate: maxDate,
                     dateFormat: "Y-m-d",
                     altInput: true,
                     altFormat: "d.m.Y",
                     disable: [
                         function(date) {
                             const day = date.getDay();
-                            return !cache.allowedDays.includes(day === 0 ? 7 : day);
+
+                            return !cache.allowedDays.includes(
+                                day === 0 ? 7 : day
+                            );
                         }
                     ],
                     locale: "ru"
