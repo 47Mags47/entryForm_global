@@ -31,69 +31,101 @@ class Service extends Model
         ];
     }
 
-    public function getAvailableTimeFromUser(User $worker, CarbonImmutable $date)
-    {
-        $shedule = $worker->shedules()->where('day_of_the_week_id', $date->dayOfWeek())->first();
-        $subscribes = $worker->subscribes()
-            ->whereBetween("start_at", [$date->startOfDay(), $date->endOfDay()])
-            ->orderBy('start_at')
-            ->get();
+    public function getAvailableTimeFromUser(
+        User $worker,
+        CarbonImmutable $date
+    ) {
+        $date = $date->toMutable();
 
-        // Получаем длительность текущей услуги
-        $step = $this->duration->format('H') . ' hours '
-            . $this->duration->format('i') . ' minutes '
-            . $this->duration->format('s') . ' seconds';
+        $schedule = $worker->shedules()
+            ->where('day_of_the_week_id', $date->dayOfWeek)
+            ->first();
 
-        // Получаем занятое время
-        $busyTimes = $subscribes->map(
-            function ($subscribe) use ($step) {
-                return [
-                    'start' => $subscribe->start_at->sub($step)->format('H:i'),
-                    'end' => $subscribe->start_at
-                        ->addHours((int) $subscribe->service->duration->format('H'))
-                        ->addMinutes((int) $subscribe->service->duration->format('i'))
-                        ->format('H:i')
-                ];
-            }
-        );
-
-        // Получаем время обеда
-        if ($shedule->lunch_start and $shedule->lunch_end)
-            $busyTimes[] = [
-                'start' => $shedule->lunch_start->sub($step)->format('H:i'),
-                'end' => $shedule->lunch_end->format('H:i'),
-            ];
-
-        // Сортируем массив по времени начала
-        $busyTimes = $busyTimes->sort(fn($current, $next) => $current['start'] > $next['start']);
-
-        // Инвертируем массив заняго времени в массив свободного
-        $availableTimes = [];
-
-        $currentStep = $shedule->date_start->format('H:i');
-        foreach ($busyTimes as $busyTime) {
-
-            if ($currentStep < $busyTime['start'])
-                $availableTimes[] = [
-                    'start' => $currentStep,
-                    'end' => $busyTime['start']
-                ];
-
-            if ($currentStep <= $busyTime['end'])
-                $currentStep = $busyTime['end'];
+        if (!$schedule) {
+            return [];
         }
 
-        $availableTimes[] = [
-            'start' => $busyTimes->last()['end'],
-            'end' => $shedule->date_end->sub($step)->format('H:i')
-        ];
+        $duration = $this->duration;
+        $durationMinutes = $duration->hour * 60 + $duration->minute;
 
-        // Преобразуем масив доступного времени в список
-        $availableTimes = collect($availableTimes)->map(function ($availableTimes) use ($step, $shedule) {
-            $period = new CarbonPeriod($availableTimes['start'], $step, $availableTimes['end']);
+        $workStart = $date->copy()->setTime(
+            $schedule->date_start->hour,
+            $schedule->date_start->minute
+        );
 
-            return collect($period->toArray())->map(fn($date) => $date->format('H:i'));
-        })->collapse()->toArray();
+        $workEnd = $date->copy()->setTime(
+            $schedule->date_end->hour,
+            $schedule->date_end->minute
+        );
+
+        // ЗАНЯТОЕ ВРЕМЯ
+        $busyTimes = $worker->subscribes()
+            ->whereBetween('start_at', [
+                $date->copy()->startOfDay(),
+                $date->copy()->endOfDay(),
+            ])
+            ->with('service')
+            ->orderBy('start_at')
+            ->get()
+            ->map(function ($subscribe) {
+
+                $serviceDuration = $subscribe->service->duration;
+
+                $serviceDurationMinutes =
+                    $serviceDuration->hour * 60
+                    + $serviceDuration->minute;
+
+                $start = $subscribe->start_at->copy();
+
+                return [
+                    'start' => $start,
+                    'end' => $start->copy()->addMinutes(
+                        $serviceDurationMinutes
+                    ),
+                ];
+            });
+
+        // ОБЕД
+        if ($schedule->lunch_start && $schedule->lunch_end) {
+            $busyTimes->push([
+                'start' => $date->copy()->setTime(
+                    $schedule->lunch_start->hour,
+                    $schedule->lunch_start->minute
+                ),
+
+                'end' => $date->copy()->setTime(
+                    $schedule->lunch_end->hour,
+                    $schedule->lunch_end->minute
+                ),
+            ]);
+        }
+
+        // ДОСТУПНОЕ ВРЕМЯ
+        $availableTimes = [];
+
+        for (
+            $current = $workStart->copy();
+            $current->copy()->addMinutes($durationMinutes) <= $workEnd;
+            $current->addMinutes($durationMinutes)
+        ) {
+            $slotStart = $current->copy();
+
+            $slotEnd = $current->copy()->addMinutes(
+                $durationMinutes
+            );
+
+            $hasConflict = $busyTimes->contains(function ($busyTime) use (
+                $slotStart,
+                $slotEnd
+            ) {
+                return $slotStart < $busyTime['end']
+                    && $slotEnd > $busyTime['start'];
+            });
+
+            if (!$hasConflict) {
+                $availableTimes[] = $slotStart->format('H:i');
+            }
+        }
 
         return $availableTimes;
     }
