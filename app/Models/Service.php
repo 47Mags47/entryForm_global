@@ -18,11 +18,11 @@ class Service extends Model
     ### Настройки
     ##################################################
     protected
-    $table = 'main__services',
-    $fillable = [
-        'name',
-        'duration',
-    ];
+        $table = 'main__services',
+        $fillable = [
+            'name',
+            'duration',
+        ];
 
     protected function casts(): array
     {
