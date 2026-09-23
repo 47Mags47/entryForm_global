@@ -75,4 +75,8 @@ class User extends Authenticatable
         return $this->hasMany(Subscribe::class, 'worker_id', 'id');
     }
 
+    public function weekends(): HasMany
+    {
+        return $this->hasMany(UserWeekends::class, 'user_id', 'id');
+    }
 }

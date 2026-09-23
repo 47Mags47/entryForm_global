@@ -7,6 +7,7 @@ use App\Models\Service;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Validator;
 
 class StoreSubscribeRequest extends FormRequest
@@ -19,27 +20,50 @@ class StoreSubscribeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name'    => ['nullable', 'string', 'min:3', 'max:255'],
-            'last_name'     => ['required', 'string', 'min:3', 'max:255'],
-            'middle_name'   => ['nullable', 'string', 'min:3', 'max:255'],
-            'phone'         => ['required', 'regex:/^((8|\+7|7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/'],
-            'email'         => ['nullable', 'email'],
-            'division_id'   => ['required', 'exists:'. Division::class .',id'],
-            'worker_id'     => ['required', 'exists:'. User::class .',id'],
-            'service_id'    => ['required', 'exists:'. Service::class .',id'],
-            'start_at'      => ['required', 'date'],
-            'comment'       => ['nullable', 'string', 'max:500'],
+            'first_name' => ['nullable', 'string', 'min:3', 'max:255'],
+            'last_name' => ['required', 'string', 'min:3', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'min:3', 'max:255'],
+            'phone' => ['required', 'regex:/^((8|\+7|7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$/'],
+            'email' => ['nullable', 'email'],
+            'division_id' => ['required', 'exists:' . Division::class . ',id'],
+            'worker_id' => ['required', 'exists:' . User::class . ',id'],
+            'service_id' => ['required', 'exists:' . Service::class . ',id'],
+            'start_at' => ['required', 'date'],
+            'comment' => ['nullable', 'string', 'max:500'],
         ];
     }
-    public function after(){
+    public function after()
+    {
         return [
-            function(Validator $validator){
+            function (Validator $validator) {
                 $date = CarbonImmutable::parse($validator->getData()['start_at']);
                 $service = Service::whereKey($validator->getData()['service_id'])->first();
                 $worker = User::whereKey($validator->getData()['worker_id'])->first();
                 $available_times = $service->getAvailableTimeFromUser($worker, $date);
                 if (!in_array($date->format('H:i'), $available_times))
                     $validator->errors()->add('start_at', 'Невозможно записаться на данное время');
+
+                // ОТПУСКА
+                if ($validator->errors()->isNotEmpty()) {
+                    return;
+                }
+
+                $worker = User::find($this->input('worker_id'));
+                $date = Carbon::parse($this->input('start_at'));
+
+                $weekend = $worker->weekends->first(function ($weekend) use ($date) {
+                    return $date->between(
+                        $weekend->date_start->copy()->startOfDay(),
+                        $weekend->date_end->copy()->endOfDay()
+                    );
+                });
+
+                if ($weekend && !$weekend?->allow_meeting) {
+                    $validator->errors()->add(
+                        'start_at',
+                        'Запись на эту дату не разрешена'
+                    );
+                }
             }
         ];
     }

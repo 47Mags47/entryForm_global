@@ -25,6 +25,7 @@ class Subscribe extends Model
         'division_id',
         'service_id',
         'worker_id',
+        'replacement_id',
         'start_at',
         'comment',
     ];

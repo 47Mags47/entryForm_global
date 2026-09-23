@@ -58,6 +58,7 @@ class ServiceController
         $worker = User::findOrFail($request->input('worker'));
         $service = Service::findOrFail($request->input('service'));
 
+        // dd($service->getAvailableWeekdays($worker));
         return response()->json(
             $service->getAvailableWeekdays($worker)
         );

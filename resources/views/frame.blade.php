@@ -526,7 +526,7 @@
             const cache = {
                 services: null,
                 times: {},
-                allowedDays: []
+                availableDates: []
             };
 
             loadServices()
@@ -552,7 +552,8 @@
             );
 
             function initFlatpickr() {
-                if (flatpickrInstance) flatpickrInstance.destroy();
+                if (flatpickrInstance)
+                    flatpickrInstance.destroy();
 
                 flatpickrInstance = flatpickr("#date", {
                     minDate: tomorrow,
@@ -562,11 +563,9 @@
                     altFormat: "d.m.Y",
                     disable: [
                         function(date) {
-                            const day = date.getDay();
+                            const dateString = flatpickr.formatDate(date, "Y-m-d");
 
-                            return !cache.allowedDays.includes(
-                                day === 0 ? 7 : day
-                            );
+                            return !cache.availableDates.includes(dateString);
                         }
                     ],
                     locale: "ru"
@@ -794,7 +793,7 @@
 
                 const workerId = $(this).val();
                 const serviceId = $service.val();
-                cache.allowedDays = [];
+                cache.availableDates = [];
 
                 if (!workerId || !serviceId) return;
 
@@ -803,7 +802,7 @@
                         service: serviceId
                     })
                     .done(days => {
-                        cache.allowedDays = days.map(Number);
+                        cache.availableDates = days;
                         initFlatpickr();
                     })
                     .fail(() => alert('Ошибка загрузки доступных дней'));
@@ -846,7 +845,7 @@
 
                 cache.services = null;
                 cache.times = {};
-                cache.allowedDays = [];
+                cache.availableDates = [];
 
                 $service.val('');
                 $worker.val('').prop('disabled', true).empty().append(
