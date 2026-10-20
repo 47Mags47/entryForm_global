@@ -17,26 +17,31 @@ class ServiceController
         if ($division === null)
             return abort(404);
 
-        $workers_ids = $division
-            ->workers()
-            ->get(['id'])
-            ->pluck(['id']);
+        $workers_ids = $division->workers()->pluck('id');
 
-        return json_encode(
-            Service::query()
-                ->with('workers')
-                ->whereHas('workers', fn($query) => $query->whereIn('user_id', $workers_ids))
-                ->get()
-                ->map(fn($service) => [
-                    'id' => $service->id,
-                    'name' => $service->name,
-                    'workers' => $service->workers
-                        ->map(fn($user) => [
-                            'id' => $user->id,
-                            'full_name' => implode(' ', [$user->last_name, $user->first_name, $user->middle_name])
-                        ])
-                ])
-        );
+        $services = Service::query()
+            ->with([
+                'workers' => fn ($query) =>
+                    $query->whereIn('main__users.id', $workers_ids),
+            ])
+            ->whereHas('workers', fn ($query) =>
+                $query->whereIn('main__users.id', $workers_ids)
+            )
+            ->get()
+            ->map(fn ($service) => [
+                'id' => $service->id,
+                'name' => $service->name,
+                'workers' => $service->workers->map(fn ($worker) => [
+                    'id' => $worker->id,
+                    'full_name' => implode(' ', array_filter([
+                        $worker->last_name,
+                        $worker->first_name,
+                        $worker->middle_name,
+                    ])),
+                ])->values(),
+            ]);
+
+            return json_encode($services);
     }
 
     public function shedulesFromWorker(Request $request)
@@ -53,6 +58,7 @@ class ServiceController
         $worker = User::findOrFail($request->input('worker'));
         $service = Service::findOrFail($request->input('service'));
 
+        // dd($service->getAvailableWeekdays($worker));
         return response()->json(
             $service->getAvailableWeekdays($worker)
         );

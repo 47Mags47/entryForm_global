@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subscribe extends Model
 {
     /** @use HasFactory<\Database\Factories\User\SubscribeFactory> */
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     ### Настройки
     ##################################################
@@ -24,6 +25,7 @@ class Subscribe extends Model
         'division_id',
         'service_id',
         'worker_id',
+        'replacement_id',
         'start_at',
         'comment',
     ];
