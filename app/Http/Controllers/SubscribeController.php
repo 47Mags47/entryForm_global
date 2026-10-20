@@ -7,9 +7,7 @@ use App\Jobs\SendSubscribeWorkerAlertJob;
 use App\Jobs\SubscribesInfoJob;
 use App\Models\Frame;
 use App\Models\Subscribe;
-
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\QueryException;
 
 class SubscribeController extends Controller
 {
@@ -21,8 +19,6 @@ class SubscribeController extends Controller
             return response()
                 ->view('dbDisconnected', [], 503);
         }
-
-        SendSubscribeWorkerAlertJob::dispatch(\App\Models\Subscribe::all()->random());
 
         $frame = Frame::where('token', $token)->firstOrFail();
         return response()
@@ -46,7 +42,7 @@ class SubscribeController extends Controller
 
         SubscribesInfoJob::dispatch($subscribe);
 
-        if($subscribe->worker->receiveMail){
+        if($subscribe->worker->receiveMail) {
             SendSubscribeWorkerAlertJob::dispatch($subscribe);
         }
 
