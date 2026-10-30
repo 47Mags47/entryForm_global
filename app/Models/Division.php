@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
 class Division extends Model
 {
     /** @use HasFactory<\Database\Factories\Admin\DivisionFactory> */
@@ -45,5 +45,10 @@ class Division extends Model
     public function workers(): BelongsToMany
     {
         return $this->users()->where('role_id', UserRole::byCode('division_worker')->id);
+    }
+
+    public function unavailable_periods(): hasMany
+    {
+        return $this->hasMany(DivisionUnavailablePeriod::class, 'division_id');
     }
 }

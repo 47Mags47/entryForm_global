@@ -799,7 +799,8 @@
 
                 $.getJSON(apiRoutes['availableWeekdays.index'], {
                         worker: workerId,
-                        service: serviceId
+                        service: serviceId,
+                        division: {{ $frame->division->id }}
                     })
                     .done(days => {
                         cache.availableDates = days;

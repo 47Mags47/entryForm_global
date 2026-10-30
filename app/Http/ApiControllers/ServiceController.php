@@ -57,10 +57,10 @@ class ServiceController
     {
         $worker = User::findOrFail($request->input('worker'));
         $service = Service::findOrFail($request->input('service'));
+        $division = Division::findOrFail($request->input('division'));
 
-        // dd($service->getAvailableWeekdays($worker));
         return response()->json(
-            $service->getAvailableWeekdays($worker)
+            $service->getAvailableWeekdays($worker, $division)
         );
     }
 }
