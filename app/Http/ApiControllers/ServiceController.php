@@ -17,7 +17,9 @@ class ServiceController
         if ($division === null)
             return abort(404);
 
-        $workers_ids = $division->workers()->pluck('id');
+        $workers_ids = $division->workers()
+            ->wherePivot('is_subscribe_available', true)
+            ->pluck('id');
 
         $services = Service::query()
             ->with([

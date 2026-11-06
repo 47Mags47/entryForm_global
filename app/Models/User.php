@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -60,7 +61,15 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Division::class, 'division_id');
     }
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(UserRole::class, 'main__users_roles', null, 'role_id')->withPivot('division_id', 'is_subscribe_available', 'deleted_at');
+    }
 
+    public function divisions(): BelongsToMany
+    {
+        return $this->belongsToMany(Division::class, 'main__users_roles')->withPivot('role_id', 'is_subscribe_available', 'deleted_at');
+    }
     public function services(): HasManyThrough
     {
         return $this->hasManyThrough(Service::class, UserService::class, 'user_id', 'id', 'id', 'service_id')->withTrashed();
