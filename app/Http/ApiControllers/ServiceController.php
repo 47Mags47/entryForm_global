@@ -19,6 +19,7 @@ class ServiceController
 
         $workers_ids = $division->workers()
             ->wherePivot('is_subscribe_available', true)
+            ->wherePivotNull('deleted_at')
             ->pluck('id');
 
         $services = Service::query()
